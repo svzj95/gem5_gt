@@ -1,6 +1,6 @@
 # README #
 
-This is a Georgia Tech internal gem5 repository used by Tushar Krishna (tushar@ece.gatech.edu) for his Interconnection Networks course.
+This is a Georgia Tech internal gem5 repository used by Tushar Krishna (http://tusharkrishna.ece.gatech.edu) for his Interconnection Networks course.
 This is an old version of the repo (from Jan 2018) and is primarily used to build Garnet2.0 in a standalone manner.
 
 ## How to Build ##
@@ -14,6 +14,7 @@ http://tusharkrishna.ece.gatech.edu/teaching/icn_s17/
 
 ## More details ##
 http://tusharkrishna.ece.gatech.edu/teaching/garnet_gt/
+
 (Ignore the my_scripts/build_Garnet_standlone.sh command as that is specific to the RHEL setup at the GT ECE servers).
  
 ## Useful links: ##
