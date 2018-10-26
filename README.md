@@ -19,4 +19,5 @@ http://tusharkrishna.ece.gatech.edu/teaching/garnet_gt/
  
 ## Useful links: ##
 http://www.gem5.org/Garnet_Synthetic_Traffic
+
 http://www.gem5.org/Garnet2.0
