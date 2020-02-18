@@ -34,6 +34,7 @@
 #include "mem/ruby/network/garnet2.0/RoutingUnit.hh"
 
 #include "base/cast.hh"
+#include "base/logging.hh"
 #include "mem/ruby/network/garnet2.0/InputUnit.hh"
 #include "mem/ruby/network/garnet2.0/Router.hh"
 #include "mem/ruby/slicc_interface/Message.hh"
@@ -160,10 +161,14 @@ RoutingUnit::outportCompute(RouteInfo route, int inport,
             lookupRoutingTable(route.vnet, route.net_dest); break;
         case XY_:     outport =
             outportComputeXY(route, inport, inport_dirn); break;
-        case TURN_MODEL_: outport =
-            outportComputeTurnModel(route, inport, inport_dirn); break;
-        case RANDOM_: outport =
-            outportComputeRandom(route, inport, inport_dirn); break;
+        case TURN_MODEL_OBLIVIOUS_: outport =
+            outportComputeTurnModelOblivious(route, inport, inport_dirn); break;
+        case TURN_MODEL_ADAPTIVE_: outport =
+            outportComputeTurnModelAdaptive(route, inport, inport_dirn); break;
+        case RANDOM_OBLIVIOUS_: outport =
+            outportComputeRandomOblivious(route, inport, inport_dirn); break;
+        case RANDOM_ADAPTIVE_: outport =
+            outportComputeRandomAdaptive(route, inport, inport_dirn); break;
         // any custom algorithm
         case CUSTOM_: outport =
             outportComputeCustom(route, inport, inport_dirn); break;
@@ -228,7 +233,7 @@ RoutingUnit::outportComputeXY(RouteInfo route,
         // x_hops == 0 and y_hops == 0
         // this is not possible
         // already checked that in outportCompute() function
-        assert(0);
+        panic("x_hops == y_hops == 0");
     }
 
     return m_outports_dirn2idx[outport_dirn];
@@ -236,7 +241,7 @@ RoutingUnit::outportComputeXY(RouteInfo route,
 
 
 int
-RoutingUnit::outportComputeTurnModel(RouteInfo route,
+RoutingUnit::outportComputeTurnModelOblivious(RouteInfo route,
                                     int inport,
                                     PortDirection inport_dirn)
 {
@@ -272,7 +277,44 @@ RoutingUnit::outportComputeTurnModel(RouteInfo route,
 }
 
 int
-RoutingUnit::outportComputeRandom(RouteInfo route,
+RoutingUnit::outportComputeTurnModelAdaptive(RouteInfo route,
+                                    int inport,
+                                    PortDirection inport_dirn)
+{
+
+    PortDirection outport_dirn = "Unknown";
+
+    int M5_VAR_USED num_rows = m_router->get_net_ptr()->getNumRows();
+    int num_cols = m_router->get_net_ptr()->getNumCols();
+    assert(num_rows > 0 && num_cols > 0);
+
+    int my_id = m_router->get_id();
+    int my_x = my_id % num_cols;
+    int my_y = my_id / num_cols;
+
+    int dest_id = route.dest_router;
+    int dest_x = dest_id % num_cols;
+    int dest_y = dest_id / num_cols;
+
+    int x_hops = abs(dest_x - my_x);
+    int y_hops = abs(dest_y - my_y);
+
+    //bool x_dirn = (dest_x >= my_x);
+    //bool y_dirn = (dest_y >= my_y);
+
+    // already checked that in outportCompute() function
+    assert(!(x_hops == 0 && y_hops == 0));
+
+    /////////////////////////////////////////
+    // ICN Lab 3: Insert code here
+
+
+    return m_outports_dirn2idx[outport_dirn];
+}
+
+
+int
+RoutingUnit::outportComputeRandomOblivious(RouteInfo route,
                               int inport,
                               PortDirection inport_dirn)
 {
@@ -328,6 +370,14 @@ RoutingUnit::outportComputeRandom(RouteInfo route,
     return m_outports_dirn2idx[outport_dirn];
 }
 
+int
+RoutingUnit::outportComputeRandomAdaptive(RouteInfo route,
+                              int inport,
+                              PortDirection inport_dirn)
+{
+    panic("%s placeholder executed", __FUNCTION__);
+}
+
 // Template for implementing custom routing algorithm
 // using port directions. (Example adaptive)
 int
@@ -335,6 +385,5 @@ RoutingUnit::outportComputeCustom(RouteInfo route,
                                  int inport,
                                  PortDirection inport_dirn)
 {
-    assert(0);
-    return -1;
+    panic("%s placeholder executed", __FUNCTION__);
 }

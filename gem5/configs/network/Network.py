@@ -64,12 +64,18 @@ def define_options(parser):
                       help="number of buffers in each ctrl VC.")
     parser.add_option("--buffers-per-data-vc", action="store", type="int", default=4,
                       help="number of buffers in each data VC.")
+    parser.add_option("--wormhole", action="store_true",
+                      default=False,
+                      help="enable wormhole")
     parser.add_option("--routing-algorithm", type="choice",
                       default="table",
-                      choices=['table', 'xy', 'turn_model', 'random', 'custom'],
+                      choices=['table', 'xy', 'turn_model_oblivious',
+                                'turn_model_adaptive', 'random_oblivious',
+                                'random_adaptive', 'custom'],
                       help="""routing algorithm in network.
-                            'table' | 'xy' | 'turn_model' | 'random' |
-                            'custom'.
+                            'table' | 'xy' | 'turn_model_oblivious' |
+                            'turn_model_adaptive' | 'random_oblivious' |
+                            'random_adaptive' | 'custom'.
                             Implementation: see garnet2.0/RoutingUnit.cc""")
     parser.add_option("--network-fault-model", action="store_true",
                       default=False,
@@ -108,9 +114,6 @@ def init_network(options, network, InterfaceClass):
 
     if options.network == "garnet2.0":
         network.num_rows = options.mesh_rows
-        network.vcs_per_vnet = options.vcs_per_vnet
-        network.buffers_per_ctrl_vc = options.buffers_per_ctrl_vc
-        network.buffers_per_data_vc = options.buffers_per_data_vc
         network.ni_flit_size = options.link_width_bits / 8
         network.garnet_deadlock_threshold = options.garnet_deadlock_threshold
 
@@ -118,14 +121,27 @@ def init_network(options, network, InterfaceClass):
         network.routing_algorithm = 0
     elif options.routing_algorithm == "xy":
         network.routing_algorithm = 1
-    elif options.routing_algorithm == "turn_model":
+    elif options.routing_algorithm == "turn_model_oblivious":
         network.routing_algorithm = 2
-    elif options.routing_algorithm == "random":
+    elif options.routing_algorithm == "turn_model_adaptive":
         network.routing_algorithm = 3
-    elif options.routing_algorithm == "custom":
+    elif options.routing_algorithm == "random_oblivious":
         network.routing_algorithm = 4
+    elif options.routing_algorithm == "random_adaptive":
+        network.routing_algorithm = 5
+    elif options.routing_algorithm == "custom":
+        network.routing_algorithm = 6
     else:
         network.routing_algorithm = 0
+
+    if options.wormhole:
+        network.vcs_per_vnet = 1
+        network.buffers_per_ctrl_vc = options.vcs_per_vnet
+        network.buffers_per_data_vc = options.buffers_per_data_vc
+    else:
+        network.vcs_per_vnet = options.vcs_per_vnet
+        network.buffers_per_ctrl_vc = options.buffers_per_ctrl_vc
+        network.buffers_per_data_vc = options.buffers_per_data_vc
 
     if options.network == "simple":
         network.setup_buffers()
