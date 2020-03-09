@@ -49,24 +49,24 @@ try:
     EnsureSConsVersion(0, 98)
     EnsureSConsVersion(0, 98, 1)
 except SystemExit, e:
-    print """
+    print ("""
 For more details, see:
     http://gem5.org/Dependencies
-"""
+""")
     raise
 
 # pybind11 requires python 2.7
 try:
     EnsurePythonVersion(2, 7)
 except SystemExit, e:
-    print """
+    print ("""
 You can use a non-default installation of the Python interpreter by
 rearranging your PATH so that scons finds the non-default 'python' and
 'python-config' first.
 
 For more details, see:
     http://gem5.org/wiki/index.php/Using_a_non-default_Python_installation
-"""
+""")
     raise
 
 sys.path[1:1] = extra_python_paths

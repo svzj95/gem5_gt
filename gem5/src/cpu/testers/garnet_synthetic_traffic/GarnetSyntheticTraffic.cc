@@ -93,7 +93,7 @@ GarnetSyntheticTraffic::GarnetSyntheticTraffic(const Params *p)
       injVnet(p->inj_vnet),
       precision(p->precision),
       responseLimit(p->response_limit),
-      masterId(p->system->getMasterId(this))
+      masterId(p->system->getMasterId(name()))
 {
     // set up counters
     noResponseCycles = 0;
@@ -293,18 +293,18 @@ GarnetSyntheticTraffic::generatePkt()
     if (injReqType == 0) {
         // generate packet for virtual network 0
         requestType = MemCmd::ReadReq;
-        req = std::make_shared<Request>(paddr, access_size, flags, masterId);
+        req = new Request(paddr, access_size, flags, masterId);
     } else if (injReqType == 1) {
         // generate packet for virtual network 1
         requestType = MemCmd::ReadReq;
         flags.set(Request::INST_FETCH);
-        req = std::make_shared<Request>(
+        req = new Request(
             0, 0x0, access_size, flags, masterId, 0x0, 0);
         req->setPaddr(paddr);
     } else {  // if (injReqType == 2)
         // generate packet for virtual network 2
         requestType = MemCmd::WriteReq;
-        req = std::make_shared<Request>(paddr, access_size, flags, masterId);
+        req = new Request(paddr, access_size, flags, masterId);
     }
 
     req->setContext(id);
