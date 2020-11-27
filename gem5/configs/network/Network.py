@@ -38,8 +38,12 @@ def define_options(parser):
 
     parser.add_option("--topology", type="string", default="Crossbar",
                       help="check configs/topologies for complete set")
+    parser.add_option("--routing-table", type="string", default="",
+                      help="add routing table")
     parser.add_option("--mesh-rows", type="int", default=0,
                       help="the number of rows in the mesh topology")
+    parser.add_option("--circ-obr", type="string", default="",
+                      help="the number of circ in the circ topology")
     parser.add_option("--network", type="choice", default="simple",
                       choices=['simple', 'garnet2.0'],
                       help="'simple'|'garnet2.0'")
@@ -68,7 +72,7 @@ def define_options(parser):
                       default=False,
                       help="enable wormhole")
     parser.add_option("--routing-algorithm", type="choice",
-                      default="table",
+                      default="xy",
                       choices=['table', 'xy', 'turn_model_oblivious',
                                 'turn_model_adaptive', 'random_oblivious',
                                 'random_adaptive', 'custom'],
@@ -133,6 +137,8 @@ def init_network(options, network, InterfaceClass):
         network.routing_algorithm = 6
     else:
         network.routing_algorithm = 0
+    network.routing_table = options.routing_table
+    network.circ_obr = options.circ_obr
 
     if options.wormhole:
         network.vcs_per_vnet = 1

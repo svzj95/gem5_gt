@@ -65,12 +65,59 @@ GarnetNetwork::GarnetNetwork(const Params *p)
     m_buffers_per_data_vc = p->buffers_per_data_vc;
     m_buffers_per_ctrl_vc = p->buffers_per_ctrl_vc;
     m_routing_algorithm = p->routing_algorithm;
-
+    m_routing_table = p->routing_table;
+    m_circ_obr = p->circ_obr;
     m_enable_fault_model = p->enable_fault_model;
     if (m_enable_fault_model)
         fault_model = p->fault_model;
 
     m_vnet_type.resize(m_virtual_networks);
+
+    int init = -1;
+    int end = -1;
+    if(m_routing_table.length()!=0){
+    std::list<int> empt_list;
+    std::list<int> path;
+    std::string buf = "";
+    for (int i = 0; i < m_routing_table.length() ; i++ ) {
+        char symb = m_routing_table.at(i);
+        if(symb == ',' || symb == ';'){
+            end = std::stoi( buf );
+            if(init == -1){
+                init = end;    
+            }
+            path.push_back(end);
+            buf = "";
+        }
+        else{
+            buf += symb;
+        }
+        if(symb == ';'){
+            m_routing_table_real.insert(std::pair<std::pair<int,int>,list<int>>(std::pair<int,int>(init,end),path));
+            path = empt_list;
+            init = -1;
+        }
+    }
+    }
+
+    if(m_circ_obr.length()!=0){
+        std::string buf = "";
+        for(int i = 0; i < m_circ_obr.length() ; i++){
+            char symb = m_routing_table.at(i);
+            if(symb == ',' || symb == ';'){
+                end = std::stoi(buf);
+                m_circ_obr_real.push_back(end);
+                buf = "";
+            }
+            else{
+                buf += symb;
+            }
+        }
+        if(buf != ""){
+            end = std::stoi(buf);
+            m_circ_obr_real.push_back(end);
+        }
+    }
 
     for (int i = 0 ; i < m_virtual_networks ; i++) {
         if (m_vnet_type_names[i] == "response")
@@ -230,11 +277,15 @@ GarnetNetwork::makeInternalLink(SwitchID src, SwitchID dest, BasicLink* link,
 
     m_networklinks.push_back(net_link);
     m_creditlinks.push_back(credit_link);
-
+    
     m_routers[dest]->addInPort(dst_inport_dirn, net_link, credit_link);
     m_routers[src]->addOutPort(src_outport_dirn, net_link,
                                routing_table_entry,
                                link->m_weight, credit_link);
+
+    int val = m_routers[src]->get_num_outports();
+    //DPRINTF(Cache, "%i %i - %i\n", src,dest, val);
+    pairToPort.insert(std::pair<std::pair<int,int>,int>(std::pair<int,int>(src,dest),val-1));
 }
 
 // Total routers in the network

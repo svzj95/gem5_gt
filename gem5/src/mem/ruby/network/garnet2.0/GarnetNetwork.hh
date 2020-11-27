@@ -35,7 +35,11 @@
 #define __MEM_RUBY_NETWORK_GARNET2_0_GARNETNETWORK_HH__
 
 #include <iostream>
-#include <vector>
+#include <map>
+#include <list>
+#include <utility>
+#include <string>
+#include "debug/Cache.hh"
 
 #include "mem/ruby/network/Network.hh"
 #include "mem/ruby/network/fault_model/FaultModel.hh"
@@ -70,6 +74,9 @@ class GarnetNetwork : public Network
     uint32_t getBuffersPerDataVC() { return m_buffers_per_data_vc; }
     uint32_t getBuffersPerCtrlVC() { return m_buffers_per_ctrl_vc; }
     int getRoutingAlgorithm() const { return m_routing_algorithm; }
+    std::map <std::pair<int, int>,std::list<int>> m_routing_table_real;
+    std::map <std::pair<int, int>,int> pairToPort;
+    std::list <int> m_circ_obr_real;   
 
     bool isFaultModelEnabled() const { return m_enable_fault_model; }
     FaultModel* fault_model;
@@ -152,6 +159,8 @@ class GarnetNetwork : public Network
     uint32_t m_buffers_per_ctrl_vc;
     uint32_t m_buffers_per_data_vc;
     int m_routing_algorithm;
+    std::string m_routing_table;
+    std::string m_circ_obr;
     bool m_enable_fault_model;
 
     // Statistical variables

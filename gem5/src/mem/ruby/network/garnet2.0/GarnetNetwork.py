@@ -44,6 +44,8 @@ class GarnetNetwork(RubyNetwork):
     buffers_per_ctrl_vc = Param.UInt32(1, "buffers per ctrl virtual channel");
     routing_algorithm = Param.Int(0,
         "0: Weight-based Table, 1: XY, 2: Custom");
+    routing_table = Param.String("","for routing table");
+    circ_obr = Param.String("","cir obr");
     enable_fault_model = Param.Bool(False, "enable network fault model");
     fault_model = Param.FaultModel(NULL, "network fault model");
     garnet_deadlock_threshold = Param.UInt32(50000,

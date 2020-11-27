@@ -39,6 +39,7 @@
 #include "mem/ruby/network/garnet2.0/Router.hh"
 #include "mem/ruby/slicc_interface/Message.hh"
 
+
 RoutingUnit::RoutingUnit(Router *router)
 {
     m_router = router;
@@ -142,6 +143,9 @@ RoutingUnit::outportCompute(RouteInfo route, int inport,
 {
     int outport = -1;
 
+    RoutingAlgorithm routing_algorithm =
+        (RoutingAlgorithm) m_router->get_net_ptr()->getRoutingAlgorithm();
+    //DPRINTF(Cache, "routing-algortihm: %s\n" , routing_algorithm);
     if (route.dest_router == m_router->get_id()) {
 
         // Multiple NIs may be connected to this router,
@@ -153,8 +157,7 @@ RoutingUnit::outportCompute(RouteInfo route, int inport,
 
     // Routing Algorithm set in GarnetNetwork.py
     // Can be over-ridden from command line using --routing-algorithm = 1
-    RoutingAlgorithm routing_algorithm =
-        (RoutingAlgorithm) m_router->get_net_ptr()->getRoutingAlgorithm();
+
 
     switch (routing_algorithm) {
         case TABLE_:  outport =
@@ -248,30 +251,30 @@ RoutingUnit::outportComputeTurnModelOblivious(RouteInfo route,
 
     PortDirection outport_dirn = "Unknown";
 
-    int M5_VAR_USED num_rows = m_router->get_net_ptr()->getNumRows();
-    int num_cols = m_router->get_net_ptr()->getNumCols();
-    assert(num_rows > 0 && num_cols > 0);
+    //int M5_VAR_USED num_rows = m_router->get_net_ptr()->getNumRows();
+    //int num_cols = m_router->get_net_ptr()->getNumCols();
+    //assert(num_rows > 0 && num_cols > 0);
 
-    int my_id = m_router->get_id();
-    int my_x = my_id % num_cols;
-    int my_y = my_id / num_cols;
+    //int my_id = m_router->get_id();
+    //int my_x = my_id % num_cols;
+    //int my_y = my_id / num_cols;
 
-    int dest_id = route.dest_router;
-    int dest_x = dest_id % num_cols;
-    int dest_y = dest_id / num_cols;
+    //int dest_id = route.dest_router;
+    //int dest_x = dest_id % num_cols;
+    //int dest_y = dest_id / num_cols;
 
-    int x_hops = abs(dest_x - my_x);
-    int y_hops = abs(dest_y - my_y);
+    //int x_hops = abs(dest_x - my_x);
+    //int y_hops = abs(dest_y - my_y);
 
     //bool x_dirn = (dest_x >= my_x);
     //bool y_dirn = (dest_y >= my_y);
 
     // already checked that in outportCompute() function
-    assert(!(x_hops == 0 && y_hops == 0));
+    // assert(!(x_hops == 0 && y_hops == 0));
 
     /////////////////////////////////////////
     // ICN Lab 3: Insert code here
-
+    
 
     return m_outports_dirn2idx[outport_dirn];
 }
@@ -284,26 +287,26 @@ RoutingUnit::outportComputeTurnModelAdaptive(RouteInfo route,
 
     PortDirection outport_dirn = "Unknown";
 
-    int M5_VAR_USED num_rows = m_router->get_net_ptr()->getNumRows();
-    int num_cols = m_router->get_net_ptr()->getNumCols();
-    assert(num_rows > 0 && num_cols > 0);
+    //int M5_VAR_USED num_rows = m_router->get_net_ptr()->getNumRows();
+    //int num_cols = m_router->get_net_ptr()->getNumCols();
+    //assert(num_rows > 0 && num_cols > 0);
 
-    int my_id = m_router->get_id();
-    int my_x = my_id % num_cols;
-    int my_y = my_id / num_cols;
+    //int my_id = m_router->get_id();
+    //int my_x = my_id % num_cols;
+    //int my_y = my_id / num_cols;
 
-    int dest_id = route.dest_router;
-    int dest_x = dest_id % num_cols;
-    int dest_y = dest_id / num_cols;
+    //int dest_id = route.dest_router;
+    //int dest_x = dest_id % num_cols;
+    //int dest_y = dest_id / num_cols;
 
-    int x_hops = abs(dest_x - my_x);
-    int y_hops = abs(dest_y - my_y);
+    //int x_hops = abs(dest_x - my_x);
+    //int y_hops = abs(dest_y - my_y);
 
     //bool x_dirn = (dest_x >= my_x);
     //bool y_dirn = (dest_y >= my_y);
 
     // already checked that in outportCompute() function
-    assert(!(x_hops == 0 && y_hops == 0));
+    //assert(!(x_hops == 0 && y_hops == 0));
 
     /////////////////////////////////////////
     // ICN Lab 3: Insert code here
@@ -385,5 +388,43 @@ RoutingUnit::outportComputeCustom(RouteInfo route,
                                  int inport,
                                  PortDirection inport_dirn)
 {
-    panic("%s placeholder executed", __FUNCTION__);
+    int my_id = m_router->get_id();
+    int src_id = route.src_router;
+    int dest_id = route.dest_router;
+    //DPRINTF(Cache,"My id: %i\n", my_id);
+    //DPRINTF(Cache,"Src id: %i\n", src_id);
+    //DPRINTF(Cache,"Dest id: %i\n", dest_id);
+    GarnetNetwork* network = m_router->get_net_ptr();
+    std::map <std::pair<int, int>,std::list<int>> table = network->m_routing_table_real;
+    std::list<int> listRouters = table[std::make_pair(src_id,dest_id)];
+    bool findThisValue = false;
+    int nextValueRouter = -1;
+    bool destReach = false;
+    for (int iter : listRouters)
+    {
+        
+        //DPRINTF(Cache,"My iter : %i\n", iter);;
+        if(findThisValue){
+            nextValueRouter = iter;
+            break;
+        }        
+        if(iter == my_id){
+            findThisValue = true;    
+        }
+        else if(iter == dest_id){
+            destReach = true;
+        }
+    }
+
+    
+    if(nextValueRouter != -1 && !destReach) {
+        //DPRINTF(Cache, "Router %i - %i port: %i\n", my_id, nextValueRouter, network->pairToPort[std::make_pair(my_id,nextValueRouter)]-1);
+        return network->pairToPort[std::make_pair(my_id,nextValueRouter)];
+    }
+    else if(destReach){
+        return 0;
+    }
+    else{
+        return -1;
+    }
 }
